@@ -4,7 +4,6 @@ const User = require('../models/userModel')
 const Post = require('../models/postModel')
 const Report = require('../models/reportModel')
 const Hashtag = require('../models/hashtagModel')
-const Transactions = require('../models/transactionModel')
 const asyncHandler = require("express-async-handler");
 
 // ! login
@@ -191,48 +190,6 @@ const postBlock = asyncHandler(async (req, res) => {
     res.status(200).json({ posts, message: `You have ${blocked} the post` });
 })
 
-// ! transaction list
-// ? /admin/get-users
-const getTransactions = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const totalTransactions = await Transactions.countDocuments();
-
-    const transactions = await Transactions.find()
-        .populate({
-            path: "userId",
-            select: "name profileImg isVerified",
-        })
-        .sort({ startDate: -1 })
-        .limit(limit)
-        .skip(startIndex);
-
-    const pagination = {};
-
-    if (endIndex < totalTransactions) {
-        pagination.next = {
-            page: page + 1,
-            limit: limit,
-        };
-    }
-
-    if (startIndex > 0) {
-        pagination.prev = {
-            page: page - 1,
-            limit: limit,
-        };
-    }
-
-    if (transactions) {
-        res.status(200).json({ transactions, pagination, totalTransactions });
-    } else {
-        res.status(404);
-        throw new Error("No transactions found");
-    }
-})
-
 
 // ! add Hashtags
 // ? /admin/add-hashtags
@@ -391,7 +348,6 @@ module.exports = {
     getPostReports,
     postBlock,
     adminGetPosts,
-    getTransactions,
     addHashtags,
     getHashtags,
     blockHashtags,

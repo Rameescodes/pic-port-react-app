@@ -64,7 +64,6 @@ const getUserStory = asyncHandler(async (req, res) => {
             select: "name profileImg isVerified",
         });
 
-    console.log(story);
     res.status(200).json(story);
 
 })

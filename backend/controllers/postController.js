@@ -263,6 +263,56 @@ const reportPost = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Post has been reported." });
 })
+// ! like posts
+// ? get /post/get-post
+const getCategories = asyncHandler(async (req, res) => {
+    const id = req.params.userId
+    const categories = await User.distinct('savedPost.category', { _id: id });
+    res.status(200).json(categories)
+})
+    
+// ! save posts
+// ? POST /post/save-post
+const createCategory = asyncHandler(async (req, res) => {
+    const { userId, categoryName } = req.body;
+    let user = await User.findById(userId)
+
+    if (!user) {
+        res.status(404)
+        throw new Error("user not found")
+    }
+    const isSaved = await User.findOne({
+        _id: userId,
+        'savedPosts.category': categoryName
+    });
+    // const isSaved = user.savedPost.find((post) => post._id === postId);
+
+    if (isSaved) {
+        throw new Error("category exists")
+    } else {
+      user = await User.findOneAndUpdate(
+            { _id: userId },
+            { $push: { savedPost: { category: categoryName } } },
+            { new: true }
+        )
+    }
+    
+
+    // const categories = await User.distinct('savedPosts.category', { _id: userId });
+    res.status(200).json({
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        profileImg: user.profileImg,
+        savedPost: user.savedPost,
+        bio: user.bio,
+        phone: user.phone,
+        isPrivate: user.isPrivate,
+        isVerified: user.isVerified,
+        token: generateToken(user.id)
+    })
+
+})
 
 
 
@@ -277,5 +327,8 @@ module.exports = {
     likePost,
     savePost,
     getSavedPost,
-    reportPost
+    reportPost,
+    getCategories,
+    createCategory
+
 }

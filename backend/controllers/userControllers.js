@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // * Public
 const verifyOtp = asyncHandler(async (req, res) => {
     const { otp } = req.body;
-
+console.log(otp)
     const sessionData = req.session;
 
     const storedOTP = sessionData.otp;
@@ -187,8 +187,7 @@ const googleAuth = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
-
+    
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
